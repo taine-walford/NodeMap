@@ -13,13 +13,14 @@ let nodeArray = [],
     paused = false,
     nodeArrayLength = [],
     returnNeighboursDebug = [],
-    nodeCount = 400
-const maxSpeed = 90,
-    nodeRadius = 80,
-    nodeSize = 2,
+    nodeCount = 200
+const maxSpeed = 60,
+    nodeRadius = 70,
+    nodeSize = 2.5,
     darkLineColour = 'rgb(15, 26, 36)',
     distortionAmount = 1.5,
-    highlightRange = 1.6
+    highlightRange = 1.6,
+    speedSlow = 2
 
 
 window.onload = () => {
@@ -104,15 +105,20 @@ function drawNodes() {
 
     darkCtx.beginPath()
     darkCtx.strokeStyle = darkLineColour
-    let nodeIndex, nodeArrLen
+    let nodeIndex, nodeArrLen, nearXNodes
     for (nodeIndex = 0, nodeArrLen = nodeArray.length; nodeIndex < nodeArrLen; nodeIndex++) {
         currentNode = nodeArray[nodeIndex]
-        let nearXNodes = nodeArray.filter(filterNode => filterNode.x > currentNode.x - nodeRadius && filterNode.x < currentNode.x + nodeRadius)
-
+        nearXNodes = nodeArray.filter(filterNode => filterNode.x > currentNode.x - (nodeRadius / highlightRange) &&
+            filterNode.x < currentNode.x + (nodeRadius / highlightRange) &&
+            (filterNode.x < currentNode.x - 2 || filterNode.x > currentNode.x + 2) &&
+            (filterNode.y < currentNode.y - 2 || filterNode.y > currentNode.y + 2)
+        )
         for (let nearXNodeIndex = 0, nearXNodesLength = nearXNodes.length; nearXNodeIndex < nearXNodesLength; nearXNodeIndex++) {
             if (nearXNodes[nearXNodeIndex].y > currentNode.y - nodeRadius && nearXNodes[nearXNodeIndex].y < currentNode.y + nodeRadius) {
                 drawBetween(currentNode, nearXNodes[nearXNodeIndex], darkCtx)
+
             }
+
         }
     }
     darkCtx.stroke()
@@ -121,8 +127,11 @@ function drawNodes() {
     medCtx.strokeStyle = 'rgb(255, 0, 0)'
     for (nodeIndex = 0, nodeArrLen = nodeArray.length; nodeIndex < nodeArrLen; nodeIndex++) {
         currentNode = nodeArray[nodeIndex]
-        let nearXNodes = nodeArray.filter(filterNode => filterNode.x > currentNode.x - (nodeRadius / highlightRange) && filterNode.x < currentNode.x + (nodeRadius / highlightRange))
-
+        nearXNodes = nodeArray.filter(filterNode => filterNode.x > currentNode.x - (nodeRadius / highlightRange) &&
+            filterNode.x < currentNode.x + (nodeRadius / highlightRange) &&
+            (filterNode.x < currentNode.x - 2 || filterNode.x > currentNode.x + 2) &&
+            (filterNode.y < currentNode.y - 2 || filterNode.y > currentNode.y + 2)
+        )
         for (let nearXNodeIndex = 0, nearXNodesLength = nearXNodes.length; nearXNodeIndex < nearXNodesLength; nearXNodeIndex++) {
             if (nearXNodes[nearXNodeIndex].y > currentNode.y - (nodeRadius / highlightRange) && nearXNodes[nearXNodeIndex].y < currentNode.y + (nodeRadius / highlightRange)) {
                 drawBetween(currentNode, nearXNodes[nearXNodeIndex], medCtx)
@@ -136,15 +145,32 @@ function drawNodes() {
 
     medCtx.beginPath()
     medCtx.strokeStyle = 'rgb(0, 255, 255)'
+    let connectionMade
     for (nodeIndex = 0, nodeArrLen = nodeArray.length; nodeIndex < nodeArrLen; nodeIndex++) {
+        connectionMade = false
         currentNode = nodeArray[nodeIndex]
-        let nearXNodes = nodeArray.filter(filterNode => filterNode.x > currentNode.x - (nodeRadius / highlightRange) && filterNode.x < currentNode.x + (nodeRadius / highlightRange))
-
+        nearXNodes = nodeArray.filter(filterNode => filterNode.x > currentNode.x - (nodeRadius / highlightRange) &&
+            filterNode.x < currentNode.x + (nodeRadius / highlightRange) &&
+            (filterNode.x < currentNode.x - 2 || filterNode.x > currentNode.x + 2) &&
+            (filterNode.y < currentNode.y - 2 || filterNode.y > currentNode.y + 2)
+        )
         for (let nearXNodeIndex = 0, nearXNodesLength = nearXNodes.length; nearXNodeIndex < nearXNodesLength; nearXNodeIndex++) {
             if (nearXNodes[nearXNodeIndex].y > currentNode.y - (nodeRadius / highlightRange) && nearXNodes[nearXNodeIndex].y < currentNode.y + (nodeRadius / highlightRange)) {
                 drawDistortedBetween(currentNode, nearXNodes[nearXNodeIndex], medCtx)
+                connectionMade = true
             }
         }
+        if (connectionMade && currentNode.connected === false) {
+            currentNode.xSpeed /= speedSlow
+            currentNode.ySpeed /= speedSlow
+            currentNode.connected = true
+        } else if (!connectionMade && currentNode.connected) {
+            currentNode.xSpeed *= speedSlow
+            currentNode.ySpeed *= speedSlow
+            currentNode.connected = false
+
+        }
+
     }
     medCtx.stroke()
 
@@ -191,9 +217,9 @@ function createNodes() {
         y = getRandom(docHeight)
         let initialXSpeed = getRandom(maxSpeed)
         let xSpeed = getRandom(2) === 0 ? 0 - initialXSpeed : initialXSpeed
-        let initialYSpeed = getRandom(maxSpeed)
+        let initialYSpeed = getRandom(maxSpeed / 2)
         let ySpeed = getRandom(2) === 0 ? 0 - initialYSpeed : initialYSpeed
-        nodeArray.push({ x, y, xSpeed, ySpeed })
+        nodeArray.push({ x, y, xSpeed, ySpeed, connected: false })
     }
 }
 
