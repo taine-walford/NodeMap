@@ -52,13 +52,13 @@ window.onload = () => {
 
 function gameLoop(timestamp) {
     var progress = timestamp - lastRender
-    avgPerf.push(progress)
-    if (avgPerf.length === 20) {
-        avgPerf = avgPerf.reduce((a, b) => a + b) / 50
-        console.clear()
-        console.log("Frametime:", avgPerf)
-        avgPerf = []
-    }
+        // avgPerf.push(progress)
+        // if (avgPerf.length === 20) {
+        //     avgPerf = avgPerf.reduce((a, b) => a + b) / 50
+        //     console.clear()
+        //     console.log("Frametime:", avgPerf)
+        //     avgPerf = []
+        // }
     updateNodes(progress)
     sortNodesByX()
     drawNodes()
