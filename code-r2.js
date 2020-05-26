@@ -5,16 +5,16 @@ let globalDoc,
     nWide,
     c,
     ctx,
-    centerToCorner
+    centerToCorner,
+    distortionFloat
 let nodeArray = [],
     lastRender = 0,
     avgPerf = [],
     paused = false,
     nodeArrayLength = [],
     returnNeighboursDebug = [],
-    distortionFloat
-const nodeCount = 400,
-    maxSpeed = 90,
+    nodeCount = 400
+const maxSpeed = 90,
     nodeRadius = 80,
     nodeSize = 2,
     darkLineColour = 'rgb(15, 26, 36)',
@@ -32,6 +32,7 @@ window.onload = () => {
     centerToCorner = Math.hypot(docWidth / 2, docHeight / 2)
     centerX = docWidth / 2
     centerY = docHeight / 2
+    nodeCount = docWidth / 4.5
 
     darkCanvas = document.getElementById("canvas");
     darkCanvas.height = docHeight
